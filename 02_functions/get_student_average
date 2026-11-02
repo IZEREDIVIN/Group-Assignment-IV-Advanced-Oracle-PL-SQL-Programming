@@ -1,1 +1,28 @@
+CREATE OR REPLACE FUNCTION get_student_average (
+  p_student_id IN students.student_id%TYPE
+) RETURN NUMBER
+AS
+  v_average NUMBER;
+  v_student_exists PLS_INTEGER;
+BEGIN
+  SELECT COUNT(*) INTO v_student_exists
+  FROM students
+  WHERE student_id = p_student_id;
+
+  IF v_student_exists = 0 THEN
+    RAISE_APPLICATION_ERROR(-20051, 'Student ID does not exist.');
+  END IF;
+
+  SELECT AVG(final_grade) INTO v_average
+  FROM enrollments
+  WHERE student_id = p_student_id
+    AND final_grade IS NOT NULL;
+
+  RETURN v_average; -- NULL means the student has no graded courses yet.
+EXCEPTION
+  WHEN OTHERS THEN
+    IF SQLCODE BETWEEN -20099 AND -20000 THEN RAISE; END IF;
+    RAISE_APPLICATION_ERROR(-20059, 'Could not calculate average: ' || SQLERRM);
+END;
+/
 

@@ -1,1 +1,29 @@
+# Implementation and Performance Notes: Hospital Records Management System
 
+## 1. Architectural Overview
+
+The Hospital Records Management System is an Oracle PL/SQL application designed to manage patient records, doctor information, appointments, and medical treatments. It follows a modular programming approach using stored procedures, functions, explicit and implicit cursors, collections, and bulk DML operations.
+
+## 2. Key Concepts Implemented
+
+- **Records (`%ROWTYPE` and User-Defined Records):**  
+  `%ROWTYPE` is used in procedures such as `register_patient_proc` and `list_doctor_appointments` to store complete table rows in PL/SQL variables. User-defined records are used when a task requires a custom combination of fields.
+
+- **Collections (Nested Tables):**  
+  Nested tables, such as `TYPE t_treatment_ids IS TABLE OF ...`, are used in `apply_bulk_treatment_adjustment` to store lists of treatment IDs and related values in memory for batch processing.
+
+- **Cursors:**
+  - **Implicit Cursors:** Automatically generated for `INSERT`, `UPDATE`, and `DELETE` statements. Attributes such as `SQL%FOUND` and `SQL%ROWCOUNT` are used to check whether rows were affected and how many.
+  - **Explicit Cursors:** Used to process multi-row query results in `list_doctor_appointments` through `OPEN`, `FETCH`, and `CLOSE` operations.
+
+- **Bulk Processing and Performance Considerations:**
+  - **`BULK COLLECT`:** Retrieves multiple rows from the `treatments` table into PL/SQL collections in a single operation, reducing the number of SQL-to-PL/SQL context switches compared with row-by-row fetching.
+  - **`FORALL`:** Performs batch DML operations on treatment costs. It can reduce context-switching overhead compared with executing a separate DML statement for each row. The actual performance improvement depends on the data volume and execution environment.
+  - **`SAVE EXCEPTIONS`:** Allows `FORALL` to continue processing other collection elements when individual DML operations fail. The resulting errors can be handled through `SQL%BULK_EXCEPTIONS`, including the `ORA-24381` exception.
+
+- **Exception Handling:**  
+  The application uses predefined exceptions, custom application errors raised through `RAISE_APPLICATION_ERROR` with error codes `-20001` through `-20004`, and safe cursor cleanup checks such as `IF c_appointments%ISOPEN THEN CLOSE c_appointments; END IF;`.
+
+## 3. Performance Summary
+
+Bulk processing reduces repeated communication between the PL/SQL and SQL engines and can improve efficiency when processing many records. `BULK COLLECT` and `FORALL` are used to process data in batches rather than relying entirely on row-by-row operations. Performance should be evaluated using representative data and test cases.

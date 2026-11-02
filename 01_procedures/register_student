@@ -1,1 +1,40 @@
+CREATE OR REPLACE PROCEDURE register_student (
+  p_student_id IN students.student_id%TYPE,
+  p_course_id  IN courses.course_id%TYPE
+) AS
+  v_student students%ROWTYPE;
+  v_course  courses%ROWTYPE;
+  v_count   PLS_INTEGER;
+  e_course_full EXCEPTION;
+BEGIN
+  -- SELECT INTO demonstrates %ROWTYPE and raises NO_DATA_FOUND if ID is absent.
+  SELECT * INTO v_student FROM students WHERE student_id = p_student_id;
+  SELECT * INTO v_course  FROM courses  WHERE course_id  = p_course_id;
+
+  SELECT COUNT(*) INTO v_count
+  FROM enrollments
+  WHERE course_id = p_course_id;
+
+  IF v_count >= v_course.capacity THEN
+    RAISE e_course_full;
+  END IF;
+
+  INSERT INTO enrollments (student_id, course_id)
+  VALUES (p_student_id, p_course_id);
+
+  -- Implicit cursor attribute: the INSERT above should affect one row.
+  IF SQL%FOUND THEN
+    DBMS_OUTPUT.PUT_LINE('Registration successful. Rows inserted: ' || SQL%ROWCOUNT);
+  END IF;
+EXCEPTION
+  WHEN e_course_full THEN
+    RAISE_APPLICATION_ERROR(-20011, 'Registration rejected: course capacity is full.');
+  WHEN DUP_VAL_ON_INDEX THEN
+    RAISE_APPLICATION_ERROR(-20012, 'Student is already registered in this course.');
+  WHEN NO_DATA_FOUND THEN
+    RAISE_APPLICATION_ERROR(-20013, 'Student ID or course ID does not exist.');
+  WHEN OTHERS THEN
+    RAISE_APPLICATION_ERROR(-20019, 'Unexpected registration error: ' || SQLERRM);
+END;
+/
 

@@ -1,1 +1,32 @@
+INSERT INTO students (student_id, first_name, last_name, email)
+VALUES (1001, 'Aline', 'Uwase', 'aline.uwase@example.edu');
 
+INSERT INTO students (student_id, first_name, last_name, email)
+VALUES (1002, 'Jean', 'Niyonzima', 'jean.niyonzima@example.edu');
+
+INSERT INTO students (student_id, first_name, last_name, email)
+VALUES (1003, 'Mugisha', 'Eric', 'mugisha.eric@example.edu');
+
+INSERT INTO courses (course_id, course_code, course_name, capacity)
+VALUES (201, 'INSY8311', 'Database Development with PL/SQL', 30);
+
+INSERT INTO courses (course_id, course_code, course_name, capacity)
+VALUES (202, 'SENG8201', 'Software Engineering Fundamentals', 25);
+
+INSERT INTO courses (course_id, course_code, course_name, capacity)
+VALUES (203, 'INPR8102', 'Introduction to Programming', 20);
+
+INSERT INTO enrollments (student_id, course_id, final_grade)
+VALUES (1001, 201, 88);
+
+INSERT INTO enrollments (student_id, course_id, final_grade)
+VALUES (1001, 202, 91);
+
+INSERT INTO enrollments (student_id, course_id, final_grade)
+VALUES (1002, 201, 76);
+
+INSERT INTO enrollments (student_id, course_id, final_grade)
+VALUES (1003, 203, 84);
+
+COMMIT;
+PROMPT Sample data inserted.

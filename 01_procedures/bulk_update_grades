@@ -1,1 +1,45 @@
+CREATE OR REPLACE PROCEDURE bulk_update_grades (
+  p_course_id IN courses.course_id%TYPE
+) AS
+  TYPE t_enrollment_ids IS TABLE OF enrollments.enrollment_id%TYPE;
+  TYPE t_grades IS TABLE OF enrollments.final_grade%TYPE;
 
+  v_ids   t_enrollment_ids;
+  v_grades t_grades;
+
+  e_bulk_errors EXCEPTION;
+  PRAGMA EXCEPTION_INIT(e_bulk_errors, -24381);
+BEGIN
+  -- BULK COLLECT fetches all course enrollment rows in one operation.
+  SELECT enrollment_id, NVL(final_grade, 0)
+  BULK COLLECT INTO v_ids, v_grades
+  FROM enrollments
+  WHERE course_id = p_course_id
+  ORDER BY enrollment_id;
+
+  IF v_ids.COUNT = 0 THEN
+    DBMS_OUTPUT.PUT_LINE('No enrollments found for course ' || p_course_id);
+    RETURN;
+  END IF;
+
+  -- FORALL sends DML in batches rather than issuing one UPDATE per loop iteration.
+  FORALL i IN 1 .. v_ids.COUNT SAVE EXCEPTIONS
+    UPDATE enrollments
+    SET final_grade = v_grades(i)
+    WHERE enrollment_id = v_ids(i);
+
+  DBMS_OUTPUT.PUT_LINE('Bulk grade operation completed. Records processed: ' || SQL%ROWCOUNT);
+EXCEPTION
+  WHEN e_bulk_errors THEN
+    DBMS_OUTPUT.PUT_LINE('One or more bulk DML operations failed.');
+    FOR i IN 1 .. SQL%BULK_EXCEPTIONS.COUNT LOOP
+      DBMS_OUTPUT.PUT_LINE(
+        'Error index=' || SQL%BULK_EXCEPTIONS(i).ERROR_INDEX ||
+        ', Oracle error=' || SQL%BULK_EXCEPTIONS(i).ERROR_CODE
+      );
+    END LOOP;
+    RAISE_APPLICATION_ERROR(-20041, 'Bulk update had one or more row errors.');
+  WHEN OTHERS THEN
+    RAISE_APPLICATION_ERROR(-20049, 'Bulk update failed: ' || SQLERRM);
+END;
+/

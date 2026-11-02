@@ -1,1 +1,17 @@
+CREATE OR REPLACE FUNCTION count_course_enrollments (
+  p_course_id IN courses.course_id%TYPE
+) RETURN PLS_INTEGER
+AS
+  v_count PLS_INTEGER;
+BEGIN
+  SELECT COUNT(*) INTO v_count
+  FROM enrollments
+  WHERE course_id = p_course_id;
+
+  RETURN v_count;
+EXCEPTION
+  WHEN OTHERS THEN
+    RAISE_APPLICATION_ERROR(-20069, 'Could not count enrollments: ' || SQLERRM);
+END;
+/
 

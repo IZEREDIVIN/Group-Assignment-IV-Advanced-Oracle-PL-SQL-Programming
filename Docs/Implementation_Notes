@@ -1,25 +1,55 @@
 Implementation and Performance Notes: Hospital Records Management System
-1. Architectural Overview
-This Oracle PL/SQL application is engineered to manage hospital records, doctors, appointments, and medical treatments. It strictly adheres to advanced PL/SQL programming standards, incorporating modular procedures, functions, explicit and implicit cursors, collections, and bulk DML operations.
 
-2. Key Concepts Implemented
-Records (%ROWTYPE & User-Defined): Used %ROWTYPE in procedures like register_patient_proc and list_doctor_appointments to seamlessly map table row structures into memory variables without redundant column declarations.
-Collections (Nested Tables): Utilized nested tables (TYPE t_treatment_ids IS TABLE OF ...) within apply_bulk_treatment_adjustment to hold dynamic lists of primary keys and financial data in memory.
+1\. Architectural Overview
+
+The Hospital Records Management System is an Oracle PL/SQL application designed to manage patient records, doctor information, appointments, and medical treatments. It follows a modular programming approach using stored procedures, functions, explicit and implicit cursors, collections, and bulk DML operations.
+
+2\. Key Concepts Implemented
+
+Records (%ROWTYPE and User-Defined Records):
+
+%ROWTYPE is used in procedures such as register_patient_proc and list_doctor_appointments to store complete table rows in PL/SQL variables. User-defined records are used when a task requires a custom combination of fields.
+
+Collections (Nested Tables):
+
+Nested tables, such as TYPE t_treatment_ids IS TABLE OF ..., are used in apply_bulk_treatment_adjustment to store lists of treatment IDs and related values in memory for batch processing.
+
 Cursors:
-Implicit Cursors: Leveraged automatically on INSERT, UPDATE, and DELETE operations using attributes like SQL%FOUND, SQL%ROWCOUNT.
-Explicit Cursors: Handled multi-row result sets explicitly via OPEN, FETCH, CLOSE loops in list_doctor_appointments.
-Bulk Processing & Performance Considerations:
-BULK COLLECT: Fetches multiple rows from the treatments table into memory collections in a single context switch, drastically minimizing round-trips between the PL/SQL engine and SQL engine.
-FORALL: Executes batch updates on treatment costs rather than running a traditional row-by-row FOR loop. This reduces context switching overhead from 
-O
-(
-N
-)
- to 
-O
-(
-1
-)
- batch operations.
-SAVE EXCEPTIONS: Catches bulk DML processing exceptions (ORA-24381) so that a failure in one row doesn't abort the entire batch transaction.
-Exception Handling: Integrated predefined exceptions, custom application errors (RAISE_APPLICATION_ERROR with error codes -20001 through -20004), and safe cursor cleanup blocks (IF c_appointments%ISOPEN THEN CLOSE ... END IF;).
+
+Implicit Cursors:
+
+Implicit cursors are automatically generated for INSERT, UPDATE, and DELETE statements. Attributes such as SQL%FOUND and SQL%ROWCOUNT are used to determine whether rows were affected and how many records were processed.
+
+Explicit Cursors:
+
+Explicit cursors are used to process multiple query results in list_doctor_appointments through OPEN, FETCH, and CLOSE operations.
+
+Bulk Processing and Performance Considerations:
+
+BULK COLLECT:
+
+BULK COLLECT retrieves multiple rows from the treatments table into PL/SQL collections in a single operation. This reduces the number of context switches between the SQL and PL/SQL engines compared to fetching records one at a time.
+
+FORALL:
+
+FORALL performs batch DML operations on treatment costs. It reduces context-switching overhead compared to executing separate DML statements for each record. The actual performance improvement depends on the amount of data being processed and the execution environment.
+
+SAVE EXCEPTIONS:
+
+SAVE EXCEPTIONS allows FORALL to continue processing other collection elements even when individual DML operations fail. Errors are captured and handled using SQL%BULK_EXCEPTIONS, including the ORA-24381 exception.
+
+Exception Handling:
+
+The application uses predefined exceptions and custom application errors raised through RAISE_APPLICATION_ERROR with error codes ranging from -20001 to -20004. It also includes safe cursor cleanup checks, such as:
+
+IF c_appointments%ISOPEN THEN\
+&#x20;   CLOSE c_appointments;\
+END IF;
+
+3\. Performance Summary
+
+Bulk processing reduces repeated communication between the PL/SQL and SQL engines, which can improve application efficiency when handling large numbers of records.
+
+BULK COLLECT and FORALL are used to process data in batches instead of relying entirely on row-by-row operations. These techniques help improve performance, reduce context-switching overhead, and make database operations more efficient.
+
+However, actual performance improvements should be evaluated through testing with representative data volumes and different test cases.

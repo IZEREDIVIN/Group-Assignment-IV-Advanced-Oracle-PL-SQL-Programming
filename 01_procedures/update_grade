@@ -1,1 +1,30 @@
+CREATE OR REPLACE PROCEDURE update_grade (
+  p_student_id IN students.student_id%TYPE,
+  p_course_id  IN courses.course_id%TYPE,
+  p_grade      IN enrollments.final_grade%TYPE
+) AS
+  e_invalid_grade EXCEPTION;
+BEGIN
+  IF p_grade IS NULL OR p_grade < 0 OR p_grade > 100 THEN
+    RAISE e_invalid_grade;
+  END IF;
 
+  UPDATE enrollments
+  SET final_grade = p_grade
+  WHERE student_id = p_student_id
+    AND course_id = p_course_id;
+
+  -- Implicit cursor attributes inspect the UPDATE's effect.
+  IF SQL%NOTFOUND THEN
+    RAISE_APPLICATION_ERROR(-20021, 'No matching enrollment was found.');
+  ELSE
+    DBMS_OUTPUT.PUT_LINE('Grade updated. Rows affected: ' || SQL%ROWCOUNT);
+  END IF;
+EXCEPTION
+  WHEN e_invalid_grade THEN
+    RAISE_APPLICATION_ERROR(-20022, 'Grade must be a number from 0 to 100.');
+  WHEN OTHERS THEN
+    IF SQLCODE BETWEEN -20099 AND -20000 THEN RAISE; END IF;
+    RAISE_APPLICATION_ERROR(-20029, 'Unexpected grade update error: ' || SQLERRM);
+END;
+/

@@ -1,1 +1,58 @@
+GitHub Workflow (Beginner-Friendly)
 
+A. Create the Repository
+
+1. Sign in to [https://github.com](https://github.com?utm_source=chatgpt.com).
+2. Select New Repository.
+3. Enter the repository name: `plsql-assignment4-<studentID1>-<studentID2>` (replace both placeholders with the students' IDs).
+4. Choose Public as required by the assignment.
+5. Add a README file only if you are not uploading an existing project README. Avoid creating duplicate files.
+
+B. Upload Files Using the GitHub Website
+
+1. Open your newly created repository.
+2. Select Add file → Upload files.
+3. Upload all project files and folders while maintaining the correct directory structure.
+4. Enter a clear commit message, for example: `Add initial schema and PL/SQL implementation`.
+5. Select Commit changes.
+
+C. Upload the Project Using Git (Recommended)
+
+Install Git, open a terminal in your project folder, and execute the following commands:
+
+```
+git init
+git add .
+git commit -m "Add student registration PL/SQL project"
+git branch -M main
+git remote add origin https://github.com/YOUR-USERNAME/plsql-assignment4-STUDENTID1-STUDENTID2.git
+git push -u origin main
+```
+
+Replace the remote URL with the exact URL of your GitHub repository.
+
+If Git requests authentication, use GitHub's supported sign-in method or a personal access token. Never include your password or access token in the repository.
+
+D. Group Collaboration (Two Members)
+
+Both students should contribute to the project and make commits using their individual GitHub accounts.
+
+Examples of meaningful commit messages:
+
+- Create relational schema and sample data.
+- Implement registration and grade procedures.
+- Add functions and test scripts.
+- Document performance and presentation notes.
+
+Each member should make genuine contributions. Do not create artificial commits or claim work that was completed by someone else.
+
+E. Final Submission Checklist
+
+- The repository is public and has the required name.
+- Both members' full names and student IDs are included in the README file.
+- All SQL scripts and documentation are uploaded.
+- All scripts compile successfully, and tests have been performed in Oracle.
+- Actual project screenshots are included in the screenshots/ folder.
+- Both members have made meaningful commits.
+- AI usage is accurately disclosed in the README file.
+- The repository URL is submitted through the assignment Google Form before the class deadline.

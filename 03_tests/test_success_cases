@@ -1,1 +1,37 @@
+SET SERVEROUTPUT ON;
 
+PROMPT === Test 1: Register a student in a course ===
+BEGIN
+  register_student(1002, 202);
+END;
+/
+
+PROMPT === Test 2: Update an existing grade ===
+BEGIN
+  update_grade(1002, 202, 89);
+END;
+/
+
+PROMPT === Test 3: Explicit cursor report ===
+BEGIN
+  show_student_enrollments(1001);
+END;
+/
+
+PROMPT === Test 4: Function result ===
+DECLARE
+  v_avg NUMBER;
+BEGIN
+  v_avg := get_student_average(1001);
+  DBMS_OUTPUT.PUT_LINE('Student 1001 average = ' || TO_CHAR(v_avg, '990.00'));
+  DBMS_OUTPUT.PUT_LINE('Course 201 enrollment count = ' || count_course_enrollments(201));
+END;
+/
+
+PROMPT === Test 5: BULK COLLECT + FORALL ===
+BEGIN
+  bulk_update_grades(201);
+END;
+/
+
+ROLLBACK;

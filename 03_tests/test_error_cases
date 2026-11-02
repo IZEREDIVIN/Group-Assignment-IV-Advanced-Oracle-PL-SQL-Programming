@@ -1,1 +1,44 @@
+SET SERVEROUTPUT ON;
+
+PROMPT === Error test 1: Duplicate registration ===
+BEGIN
+  register_student(1001, 201);
+EXCEPTION
+  WHEN OTHERS THEN DBMS_OUTPUT.PUT_LINE('Expected error: ' || SQLERRM);
+END;
+/
+
+PROMPT === Error test 2: Non-existent student ===
+BEGIN
+  register_student(9999, 201);
+EXCEPTION
+  WHEN OTHERS THEN DBMS_OUTPUT.PUT_LINE('Expected error: ' || SQLERRM);
+END;
+/
+
+PROMPT === Error test 3: Invalid grade ===
+BEGIN
+  update_grade(1001, 201, 150);
+EXCEPTION
+  WHEN OTHERS THEN DBMS_OUTPUT.PUT_LINE('Expected error: ' || SQLERRM);
+END;
+/
+
+PROMPT === Error test 4: Enrollment does not exist ===
+BEGIN
+  update_grade(1001, 203, 70);
+EXCEPTION
+  WHEN OTHERS THEN DBMS_OUTPUT.PUT_LINE('Expected error: ' || SQLERRM);
+END;
+/
+
+PROMPT === Error test 5: Unknown student average ===
+DECLARE
+  v_avg NUMBER;
+BEGIN
+  v_avg := get_student_average(9999);
+EXCEPTION
+  WHEN OTHERS THEN DBMS_OUTPUT.PUT_LINE('Expected error: ' || SQLERRM);
+END;
+/
 
